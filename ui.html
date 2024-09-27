@@ -1,0 +1,255 @@
+<!-- <h2>Rectangle Creator</h2>
+<p>Count: <input id="count" value="5"></p>
+<button id="create">Create</button>
+<button id="cancel">Cancel</button> -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+  :root {
+    --link_color: #58A0FF;
+    --link_hover_color: #abcfff;
+    --block_bg_color: #252525;
+    --block_hover_bg_color: #353535;
+    --transition_speed: all 0.2s ease-in-out;
+  }
+
+  body {
+    overflow: hidden;
+    width: 524px;
+    height: 800px;
+    background-color: #1A1A1A;
+  }
+
+  * {
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .O_Window {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #1A1A1A;
+    padding: 28px 24px;
+  }
+
+  h1 {
+    font-family: "Inter";
+    color: #FFFFFF;
+    font-size: 26px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  p,
+  span {
+    opacity: 1;
+    font-family: "Inter";
+    color: #959595;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px;
+    transition: var(--transition_speed);
+  }
+
+  a {
+    color: var(--link_color);
+    display: inline;
+
+    * {
+      display: inline;
+    }
+  }
+
+  .W_TextBlock {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    width: 100%;
+    height: auto;
+    gap: 10px;
+    background-color: #252525;
+    border-radius: 27px;
+    justify-content: start;
+    transition: var(--transition_speed);
+
+    &:is(.U_Instruction) {
+      overflow: hidden;
+      height: 194px;
+
+      &:is(.U_Hidden) {
+        height: 75px;
+
+        span {
+          opacity: 0;
+        }
+      }
+    }
+
+  }
+
+  .W_TextBlocks {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .W_Title {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    padding-left: 18px;
+    align-items: center;
+  }
+
+  .W_LinkContainer {
+    display: inline-block;
+    cursor: pointer;
+    color: var(--link_color);
+    transition: var(--transition_speed);
+
+    &:hover {
+      .A_LinkUnderline {
+        background-color: var(--link_hover_color);
+      }
+    }
+
+    &:hover {
+      color: var(--link_hover_color);
+    }
+  }
+
+  .A_LinkUnderline {
+    width: 100%;
+    height: 1px;
+    background-color: var(--link_color);
+    transition: var(--transition_speed);
+  }
+
+  .A_Link {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .A_Button {
+    width: 100%;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--block_bg_color);
+    color: #FFF;
+    font-family: Inter;
+    font-size: 26px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    border-radius: 20px;
+    padding: 10px;
+    cursor: pointer;
+    transition: var(--transition_speed);
+
+    &:hover {
+      background-color: var(--block_hover_bg_color);
+    }
+  }
+
+  .M_InstuctionAndToggle {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .A_ShowToggle {
+    width: 30px;
+    height: 30px;
+    overflow: hidden;
+    aspect-ratio: 1/1;
+    cursor: pointer;
+  }
+</style>
+
+<div class="O_Window">
+  <div class="W_TextBlocks">
+    <div class="W_Title">
+      <h1>✉️</h1>
+      <h1>Конфигуратор рассылки</h1>
+    </div>
+    <div class="W_TextBlock U_Instruction">
+      <div class="M_InstuctionAndToggle">
+        <h1>Инструкция</h1>
+        <div class="A_ShowToggle">
+          <svg width="31" height="30" viewBox="0 0 31 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M15.8359 22.0001C8.14135 22.0001 3.79065 16.5321 3.79065 15.0001C3.79065 15.0001 8.14594 8.64868 15.8359 8.64868C23.5259 8.64868 27.8812 15.0001 27.8812 15.0001C27.8812 16.5329 23.5305 22.0001 15.8359 22.0001Z"
+              stroke="white" stroke-width="2" />
+            <circle cx="15.8359" cy="14.9999" r="2.00775" fill="white" />
+          </svg>
+        </div>
+      </div>
+      <span>Если вы&nbsp;впервые работаете с&nbsp;конфигуратором, то&nbsp;сначала рекомендуем ознакомиться
+        с&nbsp;небольшой <div class="W_LinkContainer">
+          <div class="A_Link">документацией</div>
+          <div class="A_LinkUnderline"></div>
+        </div>
+      </span>
+    </div>
+    <div class="W_TextBlock">
+      <p>Выберите фрейм<br>
+        с готовой рассылкой</p>
+    </div>
+  </div>
+  <div class="A_Button">Сделать</div>
+</div>
+<script>
+  const svg1 = `
+<svg width="31" height="30" viewBox="0 0 31 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.8359 22.0001C8.14135 22.0001 3.79065 16.5321 3.79065 15.0001C3.79065 15.0001 8.14594 8.64868 15.8359 8.64868C23.5259 8.64868 27.8812 15.0001 27.8812 15.0001C27.8812 16.5329 23.5305 22.0001 15.8359 22.0001Z" stroke="white" stroke-width="2"/>
+<circle cx="15.8359" cy="14.9999" r="2.00775" fill="white"/>
+</svg>
+`;
+
+  const svg2 = `
+<svg width="30" height="30" viewBox="0 0 30 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M2.95471 15.0001C2.95471 16.5322 7.30541 22.0001 15 22.0001C22.6946 22.0001 27.0453 16.5329 27.0453 15.0001" stroke="white" stroke-width="2"/>
+<path d="M6.92664 18.9336L3.13367 22.7266" stroke="white" stroke-width="2"/>
+<path d="M23.207 18.9336L27 22.7266" stroke="white" stroke-width="2"/>
+<path d="M11.474 21.7419L10.1518 26.9404" stroke="white" stroke-width="2"/>
+<path d="M19.9818 26.9404L18.6596 21.7418" stroke="white" stroke-width="2"/>
+</svg>
+`;
+  let isSvg1 = true;
+  function toggleSVG() {
+    const svgContainer = document.querySelector('.A_ShowToggle');
+    if (isSvg1) {
+      svgContainer.innerHTML = svg2;  // Switch to the second SVG
+    } else {
+      svgContainer.innerHTML = svg1;  // Switch back to the first SVG
+    }
+
+    isSvg1 = !isSvg1;  // Toggle the state
+    const instructionFrame = document.querySelector('.U_Instruction')
+    if (isSvg1) {
+      instructionFrame.classList.remove('U_Hidden')
+    } else {
+      instructionFrame.classList.add('U_Hidden')
+    }
+  }
+  // Add event listener to toggle path on click
+  document.querySelector('.A_ShowToggle').addEventListener('click', toggleSVG);
+  document.getElementById('create').onclick = () => {
+    const textbox = document.getElementById('count');
+    const count = parseInt(textbox.value, 10);
+    parent.postMessage({ pluginMessage: { type: 'check-selection', count } }, '*')
+  }
+  document.getElementById('cancel').onclick = () => {
+    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
+  }
+</script>
