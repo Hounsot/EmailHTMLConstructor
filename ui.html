@@ -3,10 +3,10 @@
 <button id="create">Create</button>
 <button id="cancel">Cancel</button> -->
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+  @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
   :root {
-    --link_color: #58A0FF;
+    --link_color: #58a0ff;
     --link_hover_color: #abcfff;
     --block_bg_color: #252525;
     --block_hover_bg_color: #353535;
@@ -17,7 +17,7 @@
     overflow: hidden;
     width: 524px;
     height: 800px;
-    background-color: #1A1A1A;
+    background-color: #1a1a1a;
   }
 
   * {
@@ -31,13 +31,13 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background-color: #1A1A1A;
+    background-color: #1a1a1a;
     padding: 28px 24px;
   }
 
   h1 {
     font-family: "Inter";
-    color: #FFFFFF;
+    color: #ffffff;
     font-size: 26px;
     font-style: normal;
     font-weight: 500;
@@ -89,7 +89,6 @@
         }
       }
     }
-
   }
 
   .W_TextBlocks {
@@ -143,7 +142,7 @@
     align-items: center;
     justify-content: center;
     background-color: var(--block_bg_color);
-    color: #FFF;
+    color: #fff;
     font-family: Inter;
     font-size: 26px;
     font-style: normal;
@@ -194,16 +193,19 @@
           </svg>
         </div>
       </div>
-      <span>Если вы&nbsp;впервые работаете с&nbsp;конфигуратором, то&nbsp;сначала рекомендуем ознакомиться
-        с&nbsp;небольшой <div class="W_LinkContainer">
+      <span>Если вы&nbsp;впервые работаете с&nbsp;конфигуратором, то&nbsp;сначала
+        рекомендуем ознакомиться с&nbsp;небольшой
+        <div class="W_LinkContainer">
           <div class="A_Link">документацией</div>
           <div class="A_LinkUnderline"></div>
         </div>
       </span>
     </div>
     <div class="W_TextBlock">
-      <p>Выберите фрейм<br>
-        с готовой рассылкой</p>
+      <p>
+        Выберите фрейм<br />
+        с готовой рассылкой
+      </p>
     </div>
   </div>
   <div class="A_Button">Сделать</div>
@@ -227,29 +229,27 @@
 `;
   let isSvg1 = true;
   function toggleSVG() {
-    const svgContainer = document.querySelector('.A_ShowToggle');
+    const svgContainer = document.querySelector(".A_ShowToggle");
     if (isSvg1) {
-      svgContainer.innerHTML = svg2;  // Switch to the second SVG
+      svgContainer.innerHTML = svg2; // Switch to the second SVG
     } else {
-      svgContainer.innerHTML = svg1;  // Switch back to the first SVG
+      svgContainer.innerHTML = svg1; // Switch back to the first SVG
     }
 
-    isSvg1 = !isSvg1;  // Toggle the state
-    const instructionFrame = document.querySelector('.U_Instruction')
+    isSvg1 = !isSvg1; // Toggle the state
+    const instructionFrame = document.querySelector(".U_Instruction");
     if (isSvg1) {
-      instructionFrame.classList.remove('U_Hidden')
+      instructionFrame.classList.remove("U_Hidden");
     } else {
-      instructionFrame.classList.add('U_Hidden')
+      instructionFrame.classList.add("U_Hidden");
     }
   }
   // Add event listener to toggle path on click
-  document.querySelector('.A_ShowToggle').addEventListener('click', toggleSVG);
-  document.getElementById('create').onclick = () => {
-    const textbox = document.getElementById('count');
-    const count = parseInt(textbox.value, 10);
-    parent.postMessage({ pluginMessage: { type: 'check-selection', count } }, '*')
-  }
-  document.getElementById('cancel').onclick = () => {
-    parent.postMessage({ pluginMessage: { type: 'cancel' } }, '*')
-  }
+  document.querySelector(".A_ShowToggle").addEventListener("click", toggleSVG);
+  document.querySelector(".A_Button").onclick = () => {
+    parent.postMessage({ pluginMessage: { type: "convert" } }, "*");
+  };
+  document.getElementById("cancel").onclick = () => {
+    parent.postMessage({ pluginMessage: { type: "cancel" } }, "*");
+  };
 </script>
