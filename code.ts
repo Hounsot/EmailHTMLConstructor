@@ -113,11 +113,12 @@ async function processChildNode(node: SceneNode): Promise<string> {
     )
 
     const styles = extractStyles(node)
-
-    if (hasNestedFrames) {
-      html += `<tr id="${node.name}" border="0" cellspacing="0" cellpadding="0" style="${styles}"><td style="vertical-align: top;"><table style="table-layout: fixed; ${styles}>\n`
+    if (hasNestedFrames && node.name !== '96%') {
+      html += `<tr id="${node.name}" border="0" cellspacing="0" cellpadding="0" style="vertical-align: top; ${styles}"><td style="vertical-align: top;"><table id="TABLEWITHANOMALY ___ ${node.width}" width="${node.width}" style="table-layout: fixed; ${styles}>\n`
+    } else if (hasNestedFrames && node.name === '96%') {
+      html += `<tr id="${node.name}" border="0" cellspacing="0" cellpadding="0" style="vertical-align: top; ${styles}"><td align="center" style="vertical-align: top;"><table id="TABLEWITHANOMALY ___ ${node.width}" width="${node.width}" style="table-layout: fixed; ${styles}>\n`
     } else {
-      html += `<tr id="${node.name}" border="0" cellspacing="0" cellpadding="0" style="${styles}">\n`
+      html += `<tr id="${node.name}" border="0" cellspacing="0" cellpadding="0" style="vertical-align: top; ${styles}">\n`
     }
 
     for (const child of node.children) {
@@ -144,13 +145,19 @@ async function processChildNode(node: SceneNode): Promise<string> {
     if ((node.parent.type === 'INSTANCE' || node.parent.type === 'FRAME') && node.parent.layoutMode !== 'NONE') {
       childStyles = node.parent.layoutMode === 'HORIZONTAL' ? 'display: inline-block;' : ''
     }
-    html += `<td style="${extractStyles(
+    html += `<td style=" vertical-align: top; ${extractStyles(
       node
     )} ${childStyles}"><img src="https://parametr.space/media/cache/homepage_about_image_xxl/uploads/47/kuvekino_04_1713956437.jpg" width="${
       node.width
-    }" height="${node.height}"></td>\n`
+    }" height="${node.height}" style="${childStyles}"></td>\n`
   } else if (node.name === 'Gap') {
-    // Handle the rectangle logic
+    // html += `<table border="0" cellspacing="0" cellpadding="0" width="10" height="10" style="table-layout: fixed;"><tr><td style="${extractStyles(
+    //   node
+    // )}"></tr></td></table>\n`
+    html += `<td style="${extractStyles(node)}"></td>\n`
+  } else if (node.name === 'GapHighLevel') {
+    html += `<tr style="vertical-align: top; ${extractStyles(node)}"></tr>\n`
+  } else if (node.name === 'HorizontalGap') {
     html += `<td style="${extractStyles(node)}"></td>\n`
   }
   return html
