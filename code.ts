@@ -24,14 +24,14 @@ async function convertAutoLayoutToTable(frame: FrameNode) {
   }
   // Extract properties of the frame
   const styles = extractStyles(frame)
-  let html = `<table border="0" cellspacing="0" cellpadding="0" style="${styles}">\n`
+  let html = `<body style="width: 100%; display: flex; flex-direction: column; align-items: center; background-color: #D3D3D3;"><table border="0" cellspacing="0" cellpadding="0" style="width: 100% !important; max-width: 600px; ${styles}">\n`
 
   // Recursively process children (nested AutoLayouts or other nodes)
   for (const child of frame.children) {
     html += await processChildNode(child) // Pass `false` to indicate it's not top-level
   }
 
-  html += `</table>`
+  html += `</table></body>`
   return html
 }
 
@@ -131,14 +131,27 @@ async function processChildNode(node: SceneNode): Promise<string> {
     }
   } else if (node.type === 'TEXT') {
     // Handle the text node logic
-    html += `<td style="${extractStyles(node)}">${await getTextContent(node)}</td>\n`
+    let childStyles
+    if ((node.parent.type === 'INSTANCE' || node.parent.type === 'FRAME') && node.parent.layoutMode !== 'NONE') {
+      childStyles = node.parent.layoutMode === 'HORIZONTAL' ? 'display: inline-block;' : ''
+      console.warn(node.parent.name)
+      console.warn(childStyles, 'FIRST')
+    }
+    html += `<td style="${extractStyles(node)} ${childStyles}">${await getTextContent(node)}</td>\n`
   } else if (node.name === 'Image Frame') {
     // Handle the image frame logic
+    let childStyles
+    if ((node.parent.type === 'INSTANCE' || node.parent.type === 'FRAME') && node.parent.layoutMode !== 'NONE') {
+      childStyles = node.parent.layoutMode === 'HORIZONTAL' ? 'display: inline-block;' : ''
+    }
     html += `<td style="${extractStyles(
       node
-    )}"><img src="https://parametr.space/media/cache/homepage_about_image_xxl/uploads/47/kuvekino_04_1713956437.jpg" width="${
+    )} ${childStyles}"><img src="https://parametr.space/media/cache/homepage_about_image_xxl/uploads/47/kuvekino_04_1713956437.jpg" width="${
       node.width
-    }" height="${node.height}" style="display: block;"></td>\n`
+    }" height="${node.height}"></td>\n`
+  } else if (node.name === 'Gap') {
+    // Handle the rectangle logic
+    html += `<td style="${extractStyles(node)}"></td>\n`
   }
   return html
 }
