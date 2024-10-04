@@ -232,33 +232,64 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
             //     node.primaryAxisSizingMode,
             //     node.name,
             // )
-            if (
-                node.layoutMode === 'HORIZONTAL' &&
-                node.name != 'Image Frame'
-            ) {
-                html += `<tr id="${node.name}"><td id="${node.name}" ${primaryAxisAlignItems}>`
-                for (const child of node.children) {
-                    html += await processChildNode(child)
-                }
-                html += `</td></tr>`
-            } else if (
-                node.layoutMode === 'VERTICAL' &&
-                node.name != 'Image Frame'
-            ) {
-                html += `<tr id="${node.name}"><td id="${
-                    node.name
-                }" style="${extractStyles(
-                    node,
-                )}" ${primaryAxisAlignItems}><table id="${
-                    node.name
-                }" style="border-collapse: collapse;
+            if (node.parent.layoutMode === 'HORIZONTAL') {
+                if (
+                    node.layoutMode === 'HORIZONTAL' &&
+                    node.name != 'Image Frame'
+                ) {
+                    html += `<div><tr id="${node.name}"><td id="${node.name}" ${primaryAxisAlignItems}>`
+                    for (const child of node.children) {
+                        html += await processChildNode(child)
+                    }
+                    html += `</td></tr></div>`
+                } else if (
+                    node.layoutMode === 'VERTICAL' &&
+                    node.name != 'Image Frame'
+                ) {
+                    html += `<div><td id="${node.name}, ${
+                        node.parent.layoutMode
+                    }" style="${extractStyles(
+                        node,
+                    )}" ${primaryAxisAlignItems}><table id="${
+                        node.name
+                    }" style="border-collapse: collapse;
 table-layout: fixed; width: ${maxWidth}px; height: auto">`
-                for (const child of node.children) {
-                    html += await processChildNode(child)
+                    for (const child of node.children) {
+                        html += await processChildNode(child)
+                    }
+                    html += `</table></td></div>`
+                } else if (node.name === 'Image Frame') {
+                    html += `<td><img src="https://parametr.space/media/cache/homepage_about_image_xxl/uploads/47/kuvekino_04_1713956437.jpg" width="${node.width}" height="${node.height}"></td>`
                 }
-                html += `</table></td></tr>`
-            } else if (node.name === 'Image Frame') {
-                html += `<img src="https://parametr.space/media/cache/homepage_about_image_xxl/uploads/47/kuvekino_04_1713956437.jpg" width="${node.width}" height="${node.height}">`
+            } else {
+                if (
+                    node.layoutMode === 'HORIZONTAL' &&
+                    node.name != 'Image Frame'
+                ) {
+                    html += `<tr id="${node.name}">`
+                    for (const child of node.children) {
+                        html += await processChildNode(child)
+                    }
+                    html += `</tr>`
+                } else if (
+                    node.layoutMode === 'VERTICAL' &&
+                    node.name != 'Image Frame'
+                ) {
+                    html += `<tr id="${node.name}"><td id="${
+                        node.name
+                    }" style="${extractStyles(
+                        node,
+                    )}" ${primaryAxisAlignItems}><table id="${
+                        node.name
+                    }" style="border-collapse: collapse;
+table-layout: fixed; width: ${maxWidth}px; height: auto">`
+                    for (const child of node.children) {
+                        html += await processChildNode(child)
+                    }
+                    html += `</table></td></tr>`
+                } else if (node.name === 'Image Frame') {
+                    html += `<img src="https://parametr.space/media/cache/homepage_about_image_xxl/uploads/47/kuvekino_04_1713956437.jpg" width="${node.width}" height="${node.height}">`
+                }
             }
             break
         case 'TEXT':
@@ -276,7 +307,11 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
             break
         case 'RECTANGLE':
             console.log('Rectangle')
-            html += `<tr width=${node.width} height=${node.height}></tr>`
+            if (node.parent.layoutMode === 'HORIZONTAL') {
+                html += `<td id="${node.name}, ${node.parent.layoutMode}, ${node.parent.name}" width=${node.width} height=${node.height}></td>`
+            } else {
+                html += `<tr width=${node.width} height=${node.height}></tr>`
+            }
             break
     }
     return html
