@@ -1,7 +1,35 @@
+function getSelectedAutoLayoutInfo() {
+    const selection = figma.currentPage.selection
+    if (selection.length === 1) {
+        const selectedNode = selection[0]
+        // Check if the selected node has AutoLayout properties
+        if (selectedNode.type === 'FRAME' && selectedNode.layoutMode) {
+            return {
+                isSelected: true,
+                name: selectedNode.name,
+                width: selectedNode.width,
+                height: selectedNode.height,
+            }
+        }
+    }
+    return { isSelected: false }
+}
 figma.showUI(__html__, {
-    width: 524,
-    height: 800,
+    width: 460,
+    height: 660,
     title: 'Конфигуратор рассылки',
+})
+let autoLayoutInfo = getSelectedAutoLayoutInfo()
+figma.ui.postMessage({
+    type: 'auto-layout-check',
+    ...autoLayoutInfo, // Spread the returned object properties into the message
+})
+figma.on('selectionchange', () => {
+    let autoLayoutInfo = getSelectedAutoLayoutInfo()
+    figma.ui.postMessage({
+        type: 'auto-layout-check',
+        ...autoLayoutInfo, // Spread the returned object properties into the message
+    })
 })
 async function convertAutoLayoutToTable(frame: FrameNode) {
     // Check if the node is AutoLayout
@@ -178,10 +206,6 @@ function getWidthProperty(node: SceneNode): string {
 }
 async function processChildNode(node: SceneNode): Promise<string> {
     let html = ''
-    let isImage = node.name === 'Image Frame' ? true : false
-    let isGap = node.name === 'Gap' ? true : false
-    let isHorizontalAutoLayout = node.layoutMode === 'HORIZONTAL' ? true : false
-    let isVerticalAutoLayout = node.layoutMode === 'VERTICAL' ? true : false
     let primaryAxisAlignItems =
         node.primaryAxisAlignItems === 'MIN' &&
         node.counterAxisAlignItems === 'CENTER' &&
@@ -191,11 +215,7 @@ async function processChildNode(node: SceneNode): Promise<string> {
     let maxWidth = 0
     switch (node.type) {
         case 'INSTANCE':
-            console.log('Instance')
             maxWidth = findMaxWidth(node)
-            console.log(
-                `The largest width is: ${maxWidth}, parent node is ${node.name}`,
-            )
             if (
                 node.layoutMode === 'HORIZONTAL' &&
                 node.name != 'Image Frame'
@@ -220,18 +240,7 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
             }
             break
         case 'FRAME':
-            console.log('Frame')
             maxWidth = findMaxWidth(node)
-            // console.log(
-            //     `The largest width is: ${maxWidth}, parent node is ${node.name}`,
-            // )
-            // console.log(
-            //     node.primaryAxisAlignItems,
-            //     node.counterAxisAlignContent,
-            //     node.counterAxisAlignItems,
-            //     node.primaryAxisSizingMode,
-            //     node.name,
-            // )
             if (node.parent.layoutMode === 'HORIZONTAL') {
                 if (
                     node.layoutMode === 'HORIZONTAL' &&
@@ -248,18 +257,22 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
                 ) {
                     html += `<div><td id="${node.name}, ${
                         node.parent.layoutMode
-                    }" style="${extractStyles(
+                    }" style="vertical-align: top; ${extractStyles(
                         node,
                     )}" ${primaryAxisAlignItems}><table id="${
                         node.name
-                    }" style="border-collapse: collapse;
+                    }" style="vertical-align: top; border-collapse: collapse;
 table-layout: fixed; width: ${maxWidth}px; height: auto">`
                     for (const child of node.children) {
                         html += await processChildNode(child)
                     }
                     html += `</table></td></div>`
                 } else if (node.name === 'Image Frame') {
-                    html += `<td><img src="https://parametr.space/media/cache/homepage_about_image_xxl/uploads/47/kuvekino_04_1713956437.jpg" width="${node.width}" height="${node.height}"></td>`
+                    if (node.parent.layoutMode === 'HORIZONTAL') {
+                        html += `<td width="${node.width}" height="${node.height}" style="display: inline-block;"><img src="https://parametr.space/media/cache/homepage_about_image_xxl/uploads/47/kuvekino_04_1713956437.jpg" width="${node.width}" height="${node.height}"></td>`
+                    } else {
+                        html += `<td width="${node.width}" height="${node.height}"><img src="https://parametr.space/media/cache/homepage_about_image_xxl/uploads/47/kuvekino_04_1713956437.jpg" width="${node.width}" height="${node.height}"></td>`
+                    }
                 }
             } else {
                 if (
@@ -275,13 +288,15 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
                     node.layoutMode === 'VERTICAL' &&
                     node.name != 'Image Frame'
                 ) {
-                    html += `<tr id="${node.name}"><td id="${
+                    html += `<tr id="${
                         node.name
-                    }" style="${extractStyles(
+                    }" style="vertical-align: top;"><td id="${
+                        node.name
+                    }" style="vertical-align: top; ${extractStyles(
                         node,
                     )}" ${primaryAxisAlignItems}><table id="${
                         node.name
-                    }" style="border-collapse: collapse;
+                    }" style="vertical-align: top; border-collapse: collapse;
 table-layout: fixed; width: ${maxWidth}px; height: auto">`
                     for (const child of node.children) {
                         html += await processChildNode(child)
@@ -293,7 +308,6 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
             }
             break
         case 'TEXT':
-            console.log('Text')
             let widthValue = getWidthProperty(node)
             let parentLayout =
                 node.parent.layoutMode === 'HORIZONTAL'
@@ -306,7 +320,6 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
             )}">${await getTextContent(node)}</td>\n`
             break
         case 'RECTANGLE':
-            console.log('Rectangle')
             if (node.parent.layoutMode === 'HORIZONTAL') {
                 html += `<td id="${node.name}, ${node.parent.layoutMode}, ${node.parent.name}" width=${node.width} height=${node.height}></td>`
             } else {
@@ -327,16 +340,8 @@ figma.ui.onmessage = async msg => {
             figma.notify('Please select a frame with AutoLayout.')
             return
         }
-        console.log('Frame with AutoLayout is selected')
-
-        // Assume the first selected node is the target
         const selectedFrame = selectedNodes[0] as FrameNode
-        console.log(`${selectedFrame} Selected Frame`)
         const html = await convertAutoLayoutToTable(selectedFrame)
-        console.log(`PLEASE`)
-        console.log(`${html}`)
-
-        // Send the generated HTML back to the UI for copying or preview
-        figma.ui.postMessage({ type: 'html', html: html })
+        figma.ui.postMessage({ type: 'copy-html', html })
     }
 }
