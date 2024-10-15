@@ -54,38 +54,22 @@ function extractStyles(node: SceneNode): string {
     const styles = []
     styles.push('box-sizing: border-box;')
     // Extract width and height for frames and auto layouts
-    if (
-        node.type === 'FRAME' ||
-        node.type === 'GROUP' ||
-        node.type === 'INSTANCE' ||
-        node.type === 'RECTANGLE'
-    ) {
+    if (node.type === 'FRAME' || node.type === 'GROUP' || node.type === 'INSTANCE' || node.type === 'RECTANGLE') {
         if (node.width) styles.push(`width:${node.width}px;`)
         if (node.height) styles.push(`height:${node.height}px;`)
         // Extract padding (from AutoLayout settings)
-        if ('paddingLeft' in node)
-            styles.push(`padding-left:${node.paddingLeft}px;`)
-        if ('paddingRight' in node)
-            styles.push(`padding-right:${node.paddingRight}px;`)
-        if ('paddingTop' in node)
-            styles.push(`padding-top:${node.paddingTop}px;`)
-        if ('paddingBottom' in node)
-            styles.push(`padding-bottom:${node.paddingBottom}px;`)
+        if ('paddingLeft' in node) styles.push(`padding-left:${node.paddingLeft}px;`)
+        if ('paddingRight' in node) styles.push(`padding-right:${node.paddingRight}px;`)
+        if ('paddingTop' in node) styles.push(`padding-top:${node.paddingTop}px;`)
+        if ('paddingBottom' in node) styles.push(`padding-bottom:${node.paddingBottom}px;`)
     }
 
     // Extract background color (fill) if available
-    if (
-        node.fills &&
-        node.fills.length > 0 &&
-        node.fills[0].type === 'SOLID' &&
-        node.type != 'TEXT'
-    ) {
+    if (node.fills && node.fills.length > 0 && node.fills[0].type === 'SOLID' && node.type != 'TEXT') {
         const fill = node.fills[0] as SolidPaint
         const { r, g, b } = fill.color
         const alpha = fill.opacity !== undefined ? fill.opacity : 1
-        const backgroundColor = `rgba(${Math.round(r * 255)}, ${Math.round(
-            g * 255,
-        )}, ${Math.round(b * 255)}, ${alpha})`
+        const backgroundColor = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${alpha})`
         styles.push(`background-color: ${backgroundColor};`)
     }
 
@@ -105,12 +89,8 @@ function extractStyles(node: SceneNode): string {
         // Extract line-height (Figma uses percentage-based line heights)
         if (textNode.lineHeight && textNode.lineHeight.unit === 'PIXELS') {
             styles.push(`line-height: ${textNode.lineHeight.value}px;`)
-        } else if (
-            textNode.lineHeight &&
-            textNode.lineHeight.unit === 'PERCENT'
-        ) {
-            const calculatedLineHeight =
-                (textNode.lineHeight.value / 100) * textNode.fontSize
+        } else if (textNode.lineHeight && textNode.lineHeight.unit === 'PERCENT') {
+            const calculatedLineHeight = (textNode.lineHeight.value / 100) * textNode.fontSize
             styles.push(`line-height: ${calculatedLineHeight}px;`)
         }
 
@@ -130,9 +110,7 @@ function extractStyles(node: SceneNode): string {
             const fill = textNode.fills[0] as SolidPaint
             const { r, g, b } = fill.color
             const alpha = fill.opacity !== undefined ? fill.opacity : 1
-            const color = `rgba(${Math.round(r * 255)}, ${Math.round(
-                g * 255,
-            )}, ${Math.round(b * 255)}, ${alpha})`
+            const color = `rgba(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(b * 255)}, ${alpha})`
             styles.push(`color: ${color};`)
         }
     }
@@ -151,15 +129,8 @@ function findMaxWidth(node: FrameNode): number {
                     maxWidth = Math.max(maxWidth, child.width)
                 }
                 // Recursively check for child nodes
-                if (
-                    child.type === 'FRAME' ||
-                    child.type === 'INSTANCE' ||
-                    child.type === 'GROUP'
-                ) {
-                    maxWidth = Math.max(
-                        maxWidth,
-                        findMaxWidth(child as FrameNode),
-                    )
+                if (child.type === 'FRAME' || child.type === 'INSTANCE' || child.type === 'GROUP') {
+                    maxWidth = Math.max(maxWidth, findMaxWidth(child as FrameNode))
                 }
             }
         } else if (node.layoutMode === 'VERTICAL') {
@@ -169,15 +140,8 @@ function findMaxWidth(node: FrameNode): number {
                     maxWidth = Math.max(maxWidth, child.width)
                 }
                 // Recursively check for child nodes
-                if (
-                    child.type === 'FRAME' ||
-                    child.type === 'INSTANCE' ||
-                    child.type === 'GROUP'
-                ) {
-                    maxWidth = Math.max(
-                        maxWidth,
-                        findMaxWidth(child as FrameNode),
-                    )
+                if (child.type === 'FRAME' || child.type === 'INSTANCE' || child.type === 'GROUP') {
+                    maxWidth = Math.max(maxWidth, findMaxWidth(child as FrameNode))
                 }
             }
         }
@@ -190,10 +154,7 @@ function findMaxWidth(node: FrameNode): number {
 }
 function getWidthProperty(node: SceneNode): string {
     // For AutoLayout nodes (Frame or Instance), check if width is set to "fill"
-    if (
-        (node.type === 'FRAME' || node.type === 'INSTANCE') &&
-        node.layoutMode
-    ) {
+    if ((node.type === 'FRAME' || node.type === 'INSTANCE') && node.layoutMode) {
         // In AutoLayout, check if the width is set to fill container
         if (node.primaryAxisSizingMode === 'AUTO') {
             return '100%' // Fill container behavior
@@ -206,29 +167,18 @@ function getWidthProperty(node: SceneNode): string {
 }
 async function processChildNode(node: SceneNode): Promise<string> {
     let html = ''
-    let primaryAxisAlignItems =
-        node.primaryAxisAlignItems === 'MIN' &&
-        node.counterAxisAlignItems === 'CENTER' &&
-        node.layoutMode === 'VERTICAL'
-            ? `align="center"`
-            : `:)`
+    let primaryAxisAlignItems = node.primaryAxisAlignItems === 'MIN' && node.counterAxisAlignItems === 'CENTER' && node.layoutMode === 'VERTICAL' ? `align="center"` : `:)`
     let maxWidth = 0
     switch (node.type) {
         case 'INSTANCE':
             maxWidth = findMaxWidth(node)
-            if (
-                node.layoutMode === 'HORIZONTAL' &&
-                node.name != 'Image Frame'
-            ) {
+            if (node.layoutMode === 'HORIZONTAL' && node.name != 'Image Frame') {
                 html += `<tr id="${node.name}" width=${node.width} height=${node.height}><td id="${node.name}" width=${node.width} height=${node.height} ${primaryAxisAlignItems}>`
                 for (const child of node.children) {
                     html += await processChildNode(child)
                 }
                 html += `</td></tr>`
-            } else if (
-                node.layoutMode === 'VERTICAL' &&
-                node.name != 'Image Frame'
-            ) {
+            } else if (node.layoutMode === 'VERTICAL' && node.name != 'Image Frame') {
                 html += `<tr id="${node.name}" width=${node.width} height=${node.height}><td id="${node.name}" width=${node.width} height=${node.height} ${primaryAxisAlignItems}><table id="${node.name}" style="border-collapse: collapse;
 table-layout: fixed; width: ${maxWidth}px; height: auto">`
                 for (const child of node.children) {
@@ -242,24 +192,14 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
         case 'FRAME':
             maxWidth = findMaxWidth(node)
             if (node.parent.layoutMode === 'HORIZONTAL') {
-                if (
-                    node.layoutMode === 'HORIZONTAL' &&
-                    node.name != 'Image Frame'
-                ) {
+                if (node.layoutMode === 'HORIZONTAL' && node.name != 'Image Frame') {
                     html += `<div><tr id="${node.name}"><td id="${node.name}" ${primaryAxisAlignItems}>`
                     for (const child of node.children) {
                         html += await processChildNode(child)
                     }
                     html += `</td></tr></div>`
-                } else if (
-                    node.layoutMode === 'VERTICAL' &&
-                    node.name != 'Image Frame'
-                ) {
-                    html += `<div><td id="${node.name}, ${
-                        node.parent.layoutMode
-                    }" style="vertical-align: top; ${extractStyles(
-                        node,
-                    )}" ${primaryAxisAlignItems}><table id="${
+                } else if (node.layoutMode === 'VERTICAL' && node.name != 'Image Frame') {
+                    html += `<div><td id="${node.name}, ${node.parent.layoutMode}" style="vertical-align: top; ${extractStyles(node)}" ${primaryAxisAlignItems}><table id="${
                         node.name
                     }" style="vertical-align: top; border-collapse: collapse;
 table-layout: fixed; width: ${maxWidth}px; height: auto">`
@@ -275,26 +215,14 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
                     }
                 }
             } else {
-                if (
-                    node.layoutMode === 'HORIZONTAL' &&
-                    node.name != 'Image Frame'
-                ) {
+                if (node.layoutMode === 'HORIZONTAL' && node.name != 'Image Frame') {
                     html += `<tr id="${node.name}">`
                     for (const child of node.children) {
                         html += await processChildNode(child)
                     }
                     html += `</tr>`
-                } else if (
-                    node.layoutMode === 'VERTICAL' &&
-                    node.name != 'Image Frame'
-                ) {
-                    html += `<tr id="${
-                        node.name
-                    }" style="vertical-align: top;"><td id="${
-                        node.name
-                    }" style="vertical-align: top; ${extractStyles(
-                        node,
-                    )}" ${primaryAxisAlignItems}><table id="${
+                } else if (node.layoutMode === 'VERTICAL' && node.name != 'Image Frame') {
+                    html += `<tr id="${node.name}" style="vertical-align: top;"><td id="${node.name}" style="vertical-align: top; ${extractStyles(node)}" ${primaryAxisAlignItems}><table id="${
                         node.name
                     }" style="vertical-align: top; border-collapse: collapse;
 table-layout: fixed; width: ${maxWidth}px; height: auto">`
@@ -309,15 +237,14 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
             break
         case 'TEXT':
             let widthValue = getWidthProperty(node)
-            let parentLayout =
-                node.parent.layoutMode === 'HORIZONTAL'
-                    ? `display: inline-block;`
-                    : ``
-            html += `<td width="${widthValue}" height=${
-                node.height
-            } style="padding: 0; ${parentLayout} ${extractStyles(
-                node,
-            )}">${await getTextContent(node)}</td>\n`
+            if (node.parent.layoutMode === 'HORIZONTAL') {
+                let parentLayout = node.parent.layoutMode === 'HORIZONTAL' ? `display: inline-block;` : ``
+                html += `<td width="${node.width}" height=${node.height} style="padding: 0; ${parentLayout} ${extractStyles(node)}">${await getTextContent(node)}</td>\n`
+            } else {
+                html += `<tr id="${'AAAAAAAAAAAAAAAAAAA'}" width="${node.width}" height=${node.height}><td style="vertical-align: top;padding: 0; ${extractStyles(node)}">${await getTextContent(
+                    node,
+                )}</td></tr>\n`
+            }
             break
         case 'RECTANGLE':
             if (node.parent.layoutMode === 'HORIZONTAL') {
@@ -331,7 +258,9 @@ table-layout: fixed; width: ${maxWidth}px; height: auto">`
 }
 // Helper function to extract text content from a TextNode
 async function getTextContent(textNode: TextNode): Promise<string> {
-    return textNode.characters
+    const content = textNode.characters
+    // Replace Figma line breaks (newlines) with <br> tags for HTML format
+    return content.replace(/\n/g, '<br>')
 }
 figma.ui.onmessage = async msg => {
     if (msg.type === 'convert') {
